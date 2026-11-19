@@ -28,6 +28,7 @@ const files = {
 	'manifest.json': readFileSync('manifest.json'),
 	'bootstrap.js': readFileSync('src/bootstrap.js'),
 	'line-number-filter.js': readFileSync('src/line-number-filter.js'),
+	'math-speech.js': readFileSync('src/math-speech.js'),
 	'sdt-pack.js': bundle.outputFiles[0].contents,
 	'LICENSE': readFileSync('LICENSE'),
 };

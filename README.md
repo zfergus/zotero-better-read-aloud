@@ -1,8 +1,9 @@
 # Better Read Aloud
 
-A Zotero 10+ plugin that stops Read Aloud from speaking the margin line numbers in manuscripts submitted for review, such as conference and journal review copies.
+A Zotero 10+ plugin that makes Read Aloud work better on papers. It does two things:
 
-Line numbers cause more than stray "12, 13, 14" interruptions. Zotero's text extraction folds them into the paragraphs, so lines get misread as numbered list items, Read Aloud pauses after every line, and words hyphenated across lines are read as two halves ("measure- ment"). This plugin fixes all three.
+- **Skips line numbers.** Manuscripts submitted for review carry margin line numbers. Zotero's text extraction folds them into the paragraphs, so Read Aloud speaks them, lines get misread as numbered list items, Read Aloud pauses after every line, and words hyphenated across lines are read as two halves ("measure- ment"). The plugin fixes all of that.
+- **Speaks math in words.** PDF text stores math as raw symbols, which voices skip or garble. The plugin reads "∥v∥² ≤ α" as "norm of v squared less than or equal to alpha", and highlighting still follows along on the original symbols.
 
 ## Install
 
@@ -16,6 +17,7 @@ Read Aloud reads from a cached "structured document text" pack that Zotero build
 2. **Undo the fake lists.** Lines misread as numbered list items are merged back into a paragraph.
 3. **Rejoin hyphenated words.** We mark line-break hyphens as soft hyphens, the same way Zotero does for PDFs without line numbers. The hyphen leaves the spoken text but stays in the position map, so highlighting still lines up. Suspended hyphens ("short- and long-term") are kept.
 4. **Relink split paragraphs.** Paragraphs that continue across a column or page are linked again, so Read Aloud reads them without a pause.
+5. **Spell out math.** Greek letters, operators, accents ("x hat"), norms, subscripts ("x sub i") and superscripts ("squared", "inverse", "transpose") become words, in display equations and inline. Each text node carries a map from characters to glyph boxes on the page, so we rebuild that map too: every letter of "alpha" points at the α glyph, and highlighting stays aligned. Footnote markers, ordinals ("20th"), and code listings are left alone.
 
 Zotero's cache and your PDFs are never modified. If anything fails, the plugin returns Zotero's original text, and disabling the plugin restores stock behavior.
 
@@ -24,13 +26,14 @@ Zotero's cache and your PDFs are never modified. If anything fails, the plugin r
 - A Read Aloud position saved in a paper before installing may reset once.
 - Line numbers that the extractor merged into neighboring text (common in reference-list URLs) are not removed.
 - Templates that only number every fifth line are too sparse to detect and are left alone.
+- Fractions, roots and matrices are flattened when Zotero extracts PDF text, so complex equations are read as a best-effort sequence of terms. A fraction like one over two may come out as "1 2" or "1 sub 2".
 
 ## Development
 
 ```sh
 git clone --recurse-submodules https://github.com/zfergus/zotero-better-read-aloud.git
 npm install
-npm test        # behavior tests for the filter
+npm test        # behavior tests for the line-number filter and math speech
 npm run build   # writes build/zotero-better-read-aloud-<version>.xpi and build/updates.json
 ```
 

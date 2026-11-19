@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Better Read Aloud",
-  "version": "0.2.1",
-  "description": "Removes manuscript margin line numbers from the text Zotero's Read Aloud speaks, and rejoins words hyphenated across lines.",
+  "version": "0.3.0",
+  "description": "Makes Zotero's Read Aloud skip manuscript line numbers, rejoin hyphenated words, and speak math in words.",
   "author": "Zachary Ferguson",
   "homepage_url": "https://github.com/zfergus/zotero-better-read-aloud",
   "applications": {

@@ -1,8 +1,8 @@
 {
   "name": "zotero-better-read-aloud",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
-  "description": "Zotero plugin that keeps Read Aloud from speaking manuscript line numbers",
+  "description": "Zotero plugin that improves Read Aloud for papers: skips line numbers and speaks math in words",
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "build": "node scripts/build.mjs",
