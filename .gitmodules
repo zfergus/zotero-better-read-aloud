@@ -1,0 +1,3 @@
+[submodule "vendor/structured-document-text"]
+	path = vendor/structured-document-text
+	url = https://github.com/zotero/structured-document-text.git
