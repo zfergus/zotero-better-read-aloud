@@ -1,9 +1,10 @@
 # Better Read Aloud
 
-A Zotero 10+ plugin that makes Read Aloud work better on papers. It does two things:
+A Zotero 10+ plugin that makes Read Aloud work better on papers. It does three things:
 
 - **Skips line numbers.** Manuscripts submitted for review carry margin line numbers. Zotero's text extraction folds them into the paragraphs, so Read Aloud speaks them, lines get misread as numbered list items, Read Aloud pauses after every line, and words hyphenated across lines are read as two halves ("measure- ment"). The plugin fixes all of that.
 - **Speaks math in words.** PDF text stores math as raw symbols, which voices skip or garble. The plugin reads "∥v∥² ≤ α" as "norm of v squared less than or equal to alpha", and highlighting still follows along on the original symbols.
+- **Expands abbreviations.** Voices pronounce "Fig." and "Eq." literally, and Zotero treats their periods as sentence ends, so Read Aloud stops mid-sentence. The plugin reads them as "Figure" and "Equation", along with "Sec.", "Alg.", "Tab.", "e.g.", "i.e." and similar.
 
 ## Install
 
@@ -18,6 +19,7 @@ Read Aloud reads from a cached "structured document text" pack that Zotero build
 3. **Rejoin hyphenated words.** We mark line-break hyphens as soft hyphens, the same way Zotero does for PDFs without line numbers. The hyphen leaves the spoken text but stays in the position map, so highlighting still lines up. Suspended hyphens ("short- and long-term") are kept.
 4. **Relink split paragraphs.** Paragraphs that continue across a column or page are linked again, so Read Aloud reads them without a pause.
 5. **Spell out math.** Greek letters, operators, accents ("x hat"), norms, subscripts ("x sub i") and superscripts ("squared", "inverse", "transpose") become words, in display equations and inline. Each text node carries a map from characters to glyph boxes on the page, so we rebuild that map too: every letter of "alpha" points at the α glyph, and highlighting stays aligned. Footnote markers, ordinals ("20th"), and code listings are left alone.
+6. **Expand abbreviations.** Pointers like "Fig.", "Eq.", "Sec.", "Alg." and "Thm." become full words when a number, bracket or space follows, and "e.g.", "i.e.", "cf.", "vs." and "w.r.t." become "for example", "that is", "compare", "versus" and "with respect to". Zotero deliberately skips bracketed links like "(Fig. 3)", but it also drops the number from "Equation (4)", so we unlink equation numbers that follow "Eq." and Read Aloud speaks them. Those numbers lose their link in Zotero's reflowed text view only; links on the PDF page still work.
 
 Zotero's cache and your PDFs are never modified. If anything fails, the plugin returns Zotero's original text, and disabling the plugin restores stock behavior.
 
@@ -33,7 +35,7 @@ Zotero's cache and your PDFs are never modified. If anything fails, the plugin r
 ```sh
 git clone --recurse-submodules https://github.com/zfergus/zotero-better-read-aloud.git
 npm install
-npm test        # behavior tests for the line-number filter and math speech
+npm test        # behavior tests for line numbers, math speech and abbreviations
 npm run build   # writes build/zotero-better-read-aloud-<version>.xpi and build/updates.json
 ```
 

@@ -6,9 +6,10 @@
 // pack that Zotero builds from each PDF. Manuscripts submitted for review
 // carry margin line numbers, and the extractor folds those numbers into the
 // paragraphs, so Read Aloud speaks them. Math is also stored as raw symbols
-// that voices skip or garble. We wrap Zotero.SDT.getPack(), which is the
+// that voices skip or garble, and abbreviations like "Eq." are mispronounced
+// and break sentences in two. We wrap Zotero.SDT.getPack(), which is the
 // single function the reader uses to fetch that pack, and hand back a copy
-// with the line numbers removed and the math spelled out in words. Zotero's own files and cache are never
+// with the line numbers removed and math and abbreviations spelled out. Zotero's own files and cache are never
 // modified, so disabling or removing the plugin restores stock behavior.
 
 var originalGetPack = null;
@@ -40,8 +41,9 @@ async function patchPack(bytes) {
 	let structure = await original.materialize();
 	let removed = lib.stripLineNumbers(structure);
 	let mathNodes = lib.MathSpeech.verbalizeMath(structure);
-	if (!removed && !mathNodes) {
-		return { bytes: null, removed, mathNodes };
+	let abbreviations = lib.Abbreviations.expandAbbreviations(structure);
+	if (!removed && !mathNodes && !abbreviations) {
+		return { bytes: null, removed, mathNodes, abbreviations };
 	}
 	// The writer returns an ArrayBuffer, which matches what Zotero's getPack()
 	// returns, so we can hand it straight back to the reader
@@ -55,7 +57,7 @@ async function patchPack(bytes) {
 			|| patched.header.schemaVersion !== original.header.schemaVersion) {
 		throw new Error('Pack format mismatch after re-encoding');
 	}
-	return { bytes: patchedBytes, removed, mathNodes };
+	return { bytes: patchedBytes, removed, mathNodes, abbreviations };
 }
 
 async function wrappedGetPack(itemID, options) {
@@ -67,13 +69,14 @@ async function wrappedGetPack(itemID, options) {
 		let key = fingerprint(result.bytes);
 		let cached = cache.get(itemID);
 		if (!cached || cached.key !== key) {
-			let { bytes, removed, mathNodes } = await patchPack(result.bytes);
+			let { bytes, removed, mathNodes, abbreviations } = await patchPack(result.bytes);
 			cached = { key, bytes };
 			cache.set(itemID, cached);
 			if (cache.size > MAX_CACHE_ENTRIES) {
 				cache.delete(cache.keys().next().value);
 			}
-			log(`item ${itemID}: removed ${removed} line numbers, spoke math in ${mathNodes} text nodes`);
+			log(`item ${itemID}: removed ${removed} line numbers, spoke math in ${mathNodes} text nodes, `
+				+ `expanded abbreviations in ${abbreviations}`);
 		}
 		if (!cached.bytes) {
 			return result;
@@ -105,6 +108,7 @@ async function startup({ rootURI }) {
 	Services.scriptloader.loadSubScript(rootURI + 'sdt-pack.js', lib);
 	Services.scriptloader.loadSubScript(rootURI + 'line-number-filter.js', lib);
 	Services.scriptloader.loadSubScript(rootURI + 'math-speech.js', lib);
+	Services.scriptloader.loadSubScript(rootURI + 'abbreviations.js', lib);
 
 	originalGetPack = Zotero.SDT.getPack;
 	Zotero.SDT.getPack = wrappedGetPack;

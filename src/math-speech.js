@@ -392,7 +392,7 @@ var MathSpeech = (function () {
 		return counter.nodes;
 	}
 
-	return { verbalizeMath, decodeGlyphs };
+	return { verbalizeMath, decodeGlyphs, rewriteNode };
 })();
 
 if (typeof module !== 'undefined') {
